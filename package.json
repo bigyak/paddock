@@ -1,0 +1,29 @@
+{
+  "name": "yak-ai-paddock",
+  "private": true,
+  "version": "0.0.1",
+  "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
+  "main": "dist/paddock",
+  "scripts": {
+    "test": "./build.sh && mocha --require source-map-support/register dist/test/test.js"
+  },
+  "dependencies": {
+    "babel-polyfill": "*",
+    "yak-ai-wild-yak": "file:../wild-yak"
+  },
+  "devDependencies": {
+    "source-map-support": "*",
+    "source-map-loader": "*",
+    "babel-preset-es2015-without-regenerator": "*",
+    "babel-preset-stage-2": "*",
+    "babel-plugin-transform-class-properties": "*",
+    "babel-plugin-transform-async-to-generator": "*",
+    "babel-plugin-transform-flow-strip-types": "*",
+    "babel-loader": "*",
+    "supertest": "*",
+    "supertest-as-promised": "*",
+    "request-promise": "*",
+    "mocha": "*",
+    "should": "*"
+  }
+}
