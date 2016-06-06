@@ -6,7 +6,7 @@ import { parseIncomingMessage, formatOutgoingMessage } from "./formatter";
 
 export async function webhookHttpGet({ query }: HttpContext<Object>, options: FbOptionsType) {
   return (query['hub.verify_token'] === options.verifyToken) ?
-    { text: query['hub.challenge'] } : { status: 500, messages: ['Error, wrong validation token'] }
+    { text: query['hub.challenge'] } : { status: 500, text: 'Error, wrong validation token' }
 }
 
 export async function webhookHttpPost({ session, body }: HttpContext<FbIncomingBodyType>, options: FbOptionsType, topicsHandler: TopicsHandler) {
@@ -50,8 +50,6 @@ export async function webhookHttpPost({ session, body }: HttpContext<FbIncomingB
       await options.request(requestOpts);
     }
   }
-
-
 
   return { status: 200 };
 }
