@@ -1,6 +1,6 @@
 /* @flow */
 import type { IncomingMessageType, OutgoingMessageType } from "yak-ai-wild-yak/types";
-import type { FbIncomingMessageType, FbOutgoingMessageType } from "../../../types";
+import type { FbIncomingMessageType, FbOutgoingMessageType } from "../../types";
 
 export function parseIncomingMessage(message: FbIncomingMessageType) : IncomingMessageType {
   return {

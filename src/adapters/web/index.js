@@ -1,6 +1,6 @@
 /* @flow */
 import type { TopicsHandler } from "yak-ai-wild-yak/types";
-import type { WebOptionsType, WebIncomingBodyType, HttpContext } from "../../../types";
+import type { WebOptionsType, WebIncomingBodyType, HttpContext } from "../../types";
 import { webhookHttpPost } from "./handlers";
 
 export default function(options: WebOptionsType, topicsHandler: TopicsHandler) {

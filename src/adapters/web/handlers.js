@@ -1,6 +1,6 @@
 /* @flow */
 import type { TopicsHandler } from "yak-ai-wild-yak/types";
-import type { HttpContext, WebIncomingBodyType, WebOptionsType } from "../../../types";
+import type { HttpContext, WebIncomingBodyType, WebOptionsType } from "../../types";
 
 import { parseIncomingMessage, formatOutgoingMessage } from "./formatter";
 

@@ -1,6 +1,6 @@
 /* @flow */
 import type { TopicsHandler } from "yak-ai-wild-yak/types";
-import type { FbOptionsType, FbIncomingBodyType, HttpContext } from "../../../types";
+import type { FbOptionsType, FbIncomingBodyType, HttpContext } from "../../types";
 import { webhookHttpGet, webhookHttpPost } from "./handlers";
 
 export default function(options: FbOptionsType, topicsHandler: TopicsHandler) {
