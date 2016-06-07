@@ -1,5 +1,5 @@
 /* @flow */
-import type { IncomingMessageType, OutgoingMessageType } from "yak-ai-wild-yak/types";
+import type { IncomingMessageType, OutgoingMessageType } from "yak-ai-wild-yak/dist/types";
 import type { WebIncomingMessageType, WebOutgoingMessageType } from "../../types";
 
 export function parseIncomingMessage(message: WebIncomingMessageType) : IncomingMessageType {

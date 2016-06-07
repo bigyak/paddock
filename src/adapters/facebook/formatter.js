@@ -1,12 +1,22 @@
 /* @flow */
-import type { IncomingMessageType, OutgoingMessageType } from "yak-ai-wild-yak/types";
-import type { FbIncomingMessageType, FbOutgoingMessageType } from "../../types";
+import type { IncomingMessageType, OutgoingMessageType } from "yak-ai-wild-yak/dist/types";
+import type { FbIncomingMessageType, FbOutgoingMessageType, FbIncomingStringMessageType } from "../../types";
 
-export function parseIncomingMessage(message: FbIncomingMessageType) : IncomingMessageType {
-  return {
-    type: "string",
-    timestamp: message.timestamp,
-    text: message.message.text ? message.message.text : (message.postback ? message.postback.payload : "")
+export function parseIncomingMessage(incoming: FbIncomingMessageType) : IncomingMessageType {
+  if (incoming.message && incoming.message.text) {
+    return {
+      type: "string",
+      timestamp: incoming.timestamp,
+      text: incoming.message.text
+    }
+  } else if (incoming.postback) {
+    return {
+      type: "string",
+      timestamp: incoming.timestamp,
+      text: incoming.postback.payload
+    }
+  } else {
+    throw new Error("Unknown message type.");
   }
 }
 

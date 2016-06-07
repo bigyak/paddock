@@ -1,23 +1,27 @@
 /* @flow */
-import type { TopicsHandler } from "yak-ai-wild-yak/types";
+import type { TopicsHandler } from "yak-ai-wild-yak/dist/types";
 import type { HttpContext, FbIncomingBodyType, FbOptionsType, FbIncomingMessageType } from "../../types";
 
 import { parseIncomingMessage, formatOutgoingMessage } from "./formatter";
 
-export async function webhookHttpGet({ query }: HttpContext<Object>, options: FbOptionsType) {
+export async function webhookHttpGet({ query }: HttpContext<Object>, options: FbOptionsType) : Promise<{ status: number, text: any }> {
   return (query['hub.verify_token'] === options.verifyToken) ?
-    { text: query['hub.challenge'] } : { status: 500, text: 'Error, wrong validation token' }
+    { status: 200, text: query['hub.challenge'] } : { status: 500, text: 'Error, wrong validation token' }
 }
 
 export async function webhookHttpPost({ session, body }: HttpContext<FbIncomingBodyType>, options: FbOptionsType, topicsHandler: TopicsHandler) {
   const messagingEvents = body.entry[0].messaging;
+  let validEvents = messagingEvents.filter(ev => ev.message);
 
-  let eventsBySender: { [key: string]: Array<FbIncomingMessageType> }  = messagingEvents
-    .filter(ev => ev.message)
-    .reduce((acc, ev) => {
-      acc[ev.sender.id] = acc[ev.sender.id] ? acc[ev.sender.id].concat(ev) : [ev];
-      return acc;
-    }, {});
+  const eventsBySender: { [key: string]: Array<FbIncomingMessageType> } = {};
+  for (let ev of validEvents) {
+    const sender = ev.sender.id;
+    if (typeof eventsBySender[sender] === "undefined") {
+      eventsBySender[sender] = [ev];
+    } else {
+      eventsBySender[sender].push(ev);
+    }
+  }
 
   for (let sender in eventsBySender) {
     let incomingMessages = eventsBySender[sender].map(ev => parseIncomingMessage(ev));
