@@ -4,20 +4,22 @@ import type { FbOptionsType, FbIncomingBodyType, HttpContext } from "../../types
 import { webhookHttpGet, webhookHttpPost } from "./handlers";
 
 
-function getMessageBatches(payload) {
+function getMessageBatches(body) {
   let batches = [];
-  for (let i=0; i<payload.entry.length; i++) {
-    let entry = payload.entry[i];
-    let userBatches = {}
-    for (let j=0; j<entry.messaging.length; j++) {
-      let message = entry.messaging[j];
-      if (!(message.sender.id in userBatches)) {
-        userBatches[message.sender.id] = [message];
-      } else {
-        userBatches[message.sender.id].push(message);
+  if (body.entry) {
+    for (let i=0; i<body.entry.length; i++) {
+      let entry = body.entry[i];
+      let userBatches = {}
+      for (let j=0; j<entry.messaging.length; j++) {
+        let message = entry.messaging[j];
+        if (!(message.sender.id in userBatches)) {
+          userBatches[message.sender.id] = [message];
+        } else {
+          userBatches[message.sender.id].push(message);
+        }
       }
+      batches.push({object: body.object, id:entry['id'], user_messages: userBatches });
     }
-    batches.push({object: payload.object, id:entry['id'], user_messages: userBatches });
   }
   return batches;
 }

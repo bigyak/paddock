@@ -16,7 +16,11 @@ export function parseIncomingMessage(incoming: FbIncomingMessageType) : Incoming
       text: incoming.postback.payload
     }
   } else {
-    throw new Error("Unknown message type.");
+    return {
+      type: "string",
+      timestamp: incoming.timestamp,
+      text: "unknown message type"
+    }
   }
 }
 
