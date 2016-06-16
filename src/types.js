@@ -36,9 +36,7 @@ export type FbIncomingMediaMessageType = {
   }
 }
 export type FbIncomingMessageType = FbIncomingStringMessageType | FbIncomingMediaMessageType;
-export type FbIncomingBodyType = {
-  entry: Array<{ messaging: Array<FbIncomingMessageType> }>
-}
+export type FbIncomingBodyType = Array<FbIncomingMessageType>
 
 /* Web */
 export type WebIncomingStringMessageType = {
@@ -61,9 +59,41 @@ export type WebIncomingBodyType = { messages: Array<WebIncomingMessageType> }
 */
 
 /* Facebook */
-export type FbOutgoingStringMessageType = { type: "string", text: string };
-export type FbOutgoingOptionMessageType = { type: "option", values: Array<string> };
-export type FbOutgoingMessageType = FbOutgoingStringMessageType | FbOutgoingOptionMessageType;
+export type FbOutgoingStringMessageType = { text: string };
+export type FbOutgoingMessageButtonType = {
+  type: string,
+  url?: string,
+  title: string,
+  payload?: string
+};
+export type FbOutgoingElementType = {
+  title: string,
+  subtitle: string,
+  image_url: string,
+  buttons: Array<FbOutgoingMessageButtonType>
+};
+
+export type FbOutgoingOptionMessageType = {
+  attachment: {
+    type: string,
+    payload: {
+      template_type: string,
+      text: ?string,
+      buttons: Array<FbOutgoingMessageButtonType>
+    }
+  }
+};
+export type FbOutgoingElementsMessageType = {
+  attachment: {
+    type: string,
+    payload: {
+      template_type: string,
+      elements: Array<FbOutgoingElementType>
+    }
+  }
+};
+
+export type FbOutgoingMessageType = FbOutgoingStringMessageType | FbOutgoingOptionMessageType | FbOutgoingElementsMessageType;
 
 /* Web */
 export type WebOutgoingStringMessageType = { type: "string", text: string };

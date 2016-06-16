@@ -4,7 +4,7 @@ import type { FbOptionsType, FbIncomingBodyType, HttpContext } from "../../types
 import { webhookHttpGet, webhookHttpPost } from "./handlers";
 
 
-function getMessageBatches(body) {
+function getMessageBatches(body: Object) : Array<{ object: Object, id: string, user_messages: {[key: string]: string}}> {
   let batches = [];
   if (body.entry) {
     for (let i=0; i<body.entry.length; i++) {
@@ -18,7 +18,7 @@ function getMessageBatches(body) {
           userBatches[message.sender.id].push(message);
         }
       }
-      batches.push({object: body.object, id:entry['id'], user_messages: userBatches });
+      batches.push({object: body.object, id: entry.id, user_messages: userBatches });
     }
   }
   return batches;

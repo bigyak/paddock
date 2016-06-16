@@ -1,6 +1,6 @@
 /* @flow */
 import type { IncomingMessageType, OutgoingMessageType } from "yak-ai-wild-yak/dist/types";
-import type { FbIncomingMessageType, FbOutgoingMessageType, FbIncomingStringMessageType } from "../../types";
+import type { FbIncomingMessageType, FbOutgoingMessageType, FbIncomingStringMessageType, FbOutgoingMessageButtonType, FbOutgoingElementType } from "../../types";
 
 export function parseIncomingMessage(incoming: FbIncomingMessageType) : IncomingMessageType {
   if (incoming.message && incoming.message.text) {
@@ -24,20 +24,20 @@ export function parseIncomingMessage(incoming: FbIncomingMessageType) : Incoming
   }
 }
 
-function formatButtons(optionValues) {
+function formatButtons(optionValues: Array<string>) : Array<FbOutgoingMessageButtonType> {
   let buttons = [];
   for (let i=0; i<optionValues.length; i++) {
     let val = optionValues[i];
     if (typeof(val) == 'string') {
-      buttons.push({ "type":"postback", "title":val, "payload":val });
+      buttons.push({ "type": "postback", "title":val, "payload":val });
     } else if (typeof(val) == 'object') {
-      buttons.push({ "type":"web_url", "url":val.url, "title":val.text });
+      buttons.push({ "type":"web_url", "url": val.url, "title": val.text });
     }
   }
   return buttons;
 }
 
-function formatElements(elements) {
+function formatElements(elements: Array<{ title: string, subtitle: string, image_url: string, options: Array<string>}>) : Array<FbOutgoingElementType> {
   let formattedElements = [];
   for (let i=0; i<elements.length; i++) {
     formattedElements.push({
@@ -54,19 +54,17 @@ export function formatOutgoingMessage(message: OutgoingMessageType) : FbOutgoing
   switch(message.type) {
     case "string":
       return { text: message.text };
-      break;
     case "options":
       return {
         "attachment":{
           "type":"template",
           "payload":{
-            "template_type":"button",
+            "template_type": "button",
             "text": message.text ? message.text : null,
             "buttons": formatButtons(message.values)
           }
         }
       };
-      break;
     case "elements":
       return {
         "attachment":{
@@ -77,7 +75,6 @@ export function formatOutgoingMessage(message: OutgoingMessageType) : FbOutgoing
           }
         }
       };
-      break;
     default:
       return {"text": "hello world!"};
   }

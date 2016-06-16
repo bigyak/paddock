@@ -38,7 +38,7 @@ describe("Paddock", () => {
     const { env, topics } = getTopics({ includeMain: true });
     const paddock = await init(topics, { getSessionId, getSessionType }, adapterConfig);
     const result = await paddock.web.webhookHttpPost({ session: webSession, body: { messages } });
-    result.messages[0].should.equal("hey, what's up!");
+    result.messages[0].text.should.equal("hey, what's up!");
   });
 
 });
