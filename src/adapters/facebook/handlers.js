@@ -4,12 +4,12 @@ import type { HttpContext, FbIncomingBodyType, FbOptionsType, FbIncomingMessageT
 
 import { parseIncomingMessage, formatOutgoingMessage } from "./formatter";
 
-export async function webhookHttpGet({ query }: HttpContext<Object>, options: FbOptionsType) : Promise<{ status: number, text: any }> {
+export async function verify({ query }: HttpContext<Object>, options: FbOptionsType) : Promise<{ status: number, text: any }> {
   return (query['hub.verify_token'] === options.verifyToken) ?
     { status: 200, text: query['hub.challenge'] } : { status: 500, text: 'Error, wrong validation token' }
 }
 
-export async function webhookHttpPost({ session, body }: HttpContext<FbIncomingBodyType>, options: FbOptionsType, topicsHandler: TopicsHandler) {
+export async function hook({ session, body }: HttpContext<FbIncomingBodyType>, options: FbOptionsType, topicsHandler: TopicsHandler) {
   let validEvents = body.filter(ev => ev.message || ev.postback);
   let incomingMessages = validEvents.map(ev => parseIncomingMessage(ev));
 

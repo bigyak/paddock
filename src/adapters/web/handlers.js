@@ -4,7 +4,7 @@ import type { HttpContext, WebIncomingBodyType, WebOptionsType } from "../../typ
 
 import { parseIncomingMessage, formatOutgoingMessage } from "./formatter";
 
-export async function webhookHttpPost({ session, body }: HttpContext<WebIncomingBodyType>, options: WebOptionsType, topicsHandler: TopicsHandler) {
+export async function hook({ session, body }: HttpContext<WebIncomingBodyType>, options: WebOptionsType, topicsHandler: TopicsHandler) {
   let incomingMessages = body.messages.map(m => parseIncomingMessage(m));
 
   if (options.processIncomingMessages) {

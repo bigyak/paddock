@@ -1,10 +1,10 @@
 /* @flow */
 import type { TopicsHandler } from "yak-ai-wild-yak/dist/types";
 import type { WebOptionsType, WebIncomingBodyType, HttpContext } from "../../types";
-import { webhookHttpPost } from "./handlers";
+import { hook } from "./handlers";
 
 export default function(options: WebOptionsType, topicsHandler: TopicsHandler) {
   return {
-    webhookHttpPost: async (ctx: HttpContext<WebIncomingBodyType>) => await webhookHttpPost(ctx, options, topicsHandler)
+    hook: async (ctx: HttpContext<WebIncomingBodyType>) => await hook(ctx, options, topicsHandler)
   }
 }

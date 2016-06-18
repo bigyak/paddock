@@ -1,7 +1,7 @@
 /* @flow */
 import type { TopicsHandler } from "yak-ai-wild-yak/dist/types";
 import type { FbOptionsType, FbIncomingBodyType, HttpContext } from "../../types";
-import { webhookHttpGet, webhookHttpPost } from "./handlers";
+import { verify, hook } from "./handlers";
 
 
 function getMessageBatches(body: Object) : Array<{ object: Object, id: string, user_messages: {[key: string]: string}}> {
@@ -32,8 +32,8 @@ export default function(options: FbOptionsType, topicsHandler: TopicsHandler) {
     throw new Error("pageAccessToken was empty.")
   }
   return {
-    webhookHttpGet: async (ctx: HttpContext<Object>) => await webhookHttpGet(ctx, options),
-    webhookHttpPost: async (ctx: HttpContext<FbIncomingBodyType>) => await webhookHttpPost(ctx, options, topicsHandler),
+    verify: async (ctx: HttpContext<Object>) => await verify(ctx, options),
+    hook: async (ctx: HttpContext<FbIncomingBodyType>) => await hook(ctx, options, topicsHandler),
     getMessageBatches
   }
 }
