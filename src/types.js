@@ -5,7 +5,7 @@ import type { IncomingMessageType, OutgoingMessageType } from "yak-ai-wild-yak/d
 /*
   Message Formats coming in from external systems.
     a) facebook
-    b) web
+    b) simple
     c) Twitter //todo
 */
 
@@ -38,23 +38,23 @@ export type FbIncomingMediaMessageType = {
 export type FbIncomingMessageType = FbIncomingStringMessageType | FbIncomingMediaMessageType;
 export type FbIncomingBodyType = Array<FbIncomingMessageType>
 
-/* Web */
-export type WebIncomingStringMessageType = {
+/* Simple */
+export type SimpleIncomingStringMessageType = {
   timestamp: number,
   text: string
 };
-type WebMediaAttachmentType = { type: string, url: string };
-export type WebIncomingMediaMessageType = {
+type SimpleMediaAttachmentType = { type: string, url: string };
+export type SimpleIncomingMediaMessageType = {
   timestamp: number,
-  attachments: Array<WebMediaAttachmentType>
+  attachments: Array<SimpleMediaAttachmentType>
 }
-export type WebIncomingMessageType = WebIncomingStringMessageType | WebIncomingMediaMessageType;
-export type WebIncomingBodyType = { messages: Array<WebIncomingMessageType> }
+export type SimpleIncomingMessageType = SimpleIncomingStringMessageType | SimpleIncomingMediaMessageType;
+export type SimpleIncomingBodyType = { messages: Array<SimpleIncomingMessageType> }
 
 /*
   Message Formats which we send to external systems.
     a) facebook
-    b) web
+    b) simple
     c) Twitter //todo
 */
 
@@ -95,12 +95,12 @@ export type FbOutgoingElementsMessageType = {
 
 export type FbOutgoingMessageType = FbOutgoingStringMessageType | FbOutgoingOptionMessageType | FbOutgoingElementsMessageType;
 
-/* Web */
-export type WebOutgoingStringMessageType = { type: "string", text: string };
-export type WebOutgoingOptionMessageType = { type: "option", values: Array<string> };
-export type WebOutgoingMessageType = WebOutgoingStringMessageType | WebOutgoingOptionMessageType;
+/* Simple */
+export type SimpleOutgoingStringMessageType = { type: "string", text: string };
+export type SimpleOutgoingOptionMessageType = { type: "option", values: Array<string> };
+export type SimpleOutgoingMessageType = SimpleOutgoingStringMessageType | SimpleOutgoingOptionMessageType;
 
-export type ExternalOutgoingMessageType = FbOutgoingMessageType | WebOutgoingMessageType;
+export type ExternalOutgoingMessageType = FbOutgoingMessageType | SimpleOutgoingMessageType;
 
 export type FbOptionsType = {
   verifyToken: string,
@@ -110,7 +110,7 @@ export type FbOptionsType = {
   processOutgoingMessages?: (msgs: Array<OutgoingMessageType>) => Array<OutgoingMessageType>
 }
 
-export type WebOptionsType = {
+export type SimpleOptionsType = {
   processIncomingMessages?: (msgs: Array<IncomingMessageType>) => Array<IncomingMessageType>,
   processOutgoingMessages?: (msgs: Array<OutgoingMessageType>) => Array<OutgoingMessageType>
 }

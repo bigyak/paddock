@@ -1,13 +1,13 @@
 /* @flow */
 import type { TopicType, InitYakOptionsType } from "yak-ai-wild-yak/dist/types";
-import type { FbOptionsType, WebOptionsType } from "./types";
+import type { FbOptionsType, SimpleOptionsType } from "./types";
 import { init as initYak } from "yak-ai-wild-yak";
-import webAdapter from "./adapters/web";
+import simpleAdapter from "./adapters/simple";
 import facebookAdapter from "./adapters/facebook";
 
-export function init(topics: Array<TopicType>, options: InitYakOptionsType, adapterConfig: { facebook: FbOptionsType, web: WebOptionsType }) {
+export function init(topics: Array<TopicType>, options: InitYakOptionsType, adapterConfig: { facebook: FbOptionsType, simple: SimpleOptionsType }) {
   const handler = initYak(topics, options);
-  const web = adapterConfig.web ? webAdapter(adapterConfig.web, handler) : undefined;
+  const simple = adapterConfig.simple ? simpleAdapter(adapterConfig.simple, handler) : undefined;
   const facebook = adapterConfig.facebook ? facebookAdapter(adapterConfig.facebook, handler) : undefined;
-  return { web, facebook };
+  return { simple, facebook };
 }

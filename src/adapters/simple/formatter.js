@@ -1,8 +1,8 @@
 /* @flow */
 import type { IncomingMessageType, OutgoingMessageType } from "yak-ai-wild-yak/dist/types";
-import type { WebIncomingMessageType, WebOutgoingMessageType } from "../../types";
+import type { SimpleIncomingMessageType, SimpleOutgoingMessageType } from "../../types";
 
-export function parseIncomingMessage(message: WebIncomingMessageType) : IncomingMessageType {
+export function parseIncomingMessage(message: SimpleIncomingMessageType) : IncomingMessageType {
   if (message.text) {
     return {
       type: "string",
@@ -20,7 +20,7 @@ export function parseIncomingMessage(message: WebIncomingMessageType) : Incoming
   }
 }
 
-export function formatOutgoingMessage(message: OutgoingMessageType) : WebOutgoingMessageType {
-  const _message: WebOutgoingMessageType = message;
+export function formatOutgoingMessage(message: OutgoingMessageType) : SimpleOutgoingMessageType {
+  const _message: SimpleOutgoingMessageType = message;
   return _message;
 }

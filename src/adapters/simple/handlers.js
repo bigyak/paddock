@@ -1,10 +1,10 @@
 /* @flow */
 import type { TopicsHandler } from "yak-ai-wild-yak/dist/types";
-import type { HttpContext, WebIncomingBodyType, WebOptionsType } from "../../types";
+import type { HttpContext, SimpleIncomingBodyType, SimpleOptionsType } from "../../types";
 
 import { parseIncomingMessage, formatOutgoingMessage } from "./formatter";
 
-export async function hook({ session, body }: HttpContext<WebIncomingBodyType>, options: WebOptionsType, topicsHandler: TopicsHandler) {
+export async function hook({ session, body }: HttpContext<SimpleIncomingBodyType>, options: SimpleOptionsType, topicsHandler: TopicsHandler) {
   let incomingMessages = body.messages.map(m => parseIncomingMessage(m));
 
   if (options.processIncomingMessages) {
