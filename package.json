@@ -1,15 +1,14 @@
 {
-  "name": "yak-ai-paddock",
-  "private": true,
+  "name": "paddock",
   "version": "0.0.1",
-  "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
+  "author": "Yak<yak@agilehead.com>",
   "main": "dist/paddock",
   "scripts": {
     "test": "./build.sh && mocha --require source-map-support/register dist/test/test.js"
   },
   "dependencies": {
     "babel-polyfill": "*",
-    "yak-ai-wild-yak": "file:../wild-yak"
+    "wild-yak": "*"
   },
   "devDependencies": {
     "source-map-support": "*",

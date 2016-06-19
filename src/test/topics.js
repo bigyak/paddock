@@ -1,5 +1,5 @@
-import { defTopic, defPattern, defHook, enterTopic, exitTopic, disableHooks, disableHooksExcept } from "yak-ai-wild-yak";
-import type { TopicType, HookType, RegexParseResultType, StateType } from "yak-ai-wild-yak/dist/types";
+import { defTopic, defPattern, defHook, enterTopic, exitTopic, disableHooks, disableHooksExcept } from "wild-yak";
+import type { TopicType, HookType, RegexParseResultType, StateType } from "wild-yak/dist/types";
 
 export default function getTopics(options) {
 

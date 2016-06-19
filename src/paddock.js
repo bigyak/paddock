@@ -1,7 +1,7 @@
 /* @flow */
-import type { TopicType, InitYakOptionsType } from "yak-ai-wild-yak/dist/types";
+import type { TopicType, InitYakOptionsType } from "wild-yak/dist/types";
 import type { FbOptionsType, SimpleOptionsType } from "./types";
-import { init as initYak } from "yak-ai-wild-yak";
+import { init as initYak } from "wild-yak";
 import simpleAdapter from "./adapters/simple";
 import facebookAdapter from "./adapters/facebook";
 

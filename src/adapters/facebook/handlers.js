@@ -1,5 +1,5 @@
 /* @flow */
-import type { TopicsHandler } from "yak-ai-wild-yak/dist/types";
+import type { TopicsHandler } from "wild-yak/dist/types";
 import type { HttpContext, FbIncomingBodyType, FbOptionsType, FbIncomingMessageType } from "../../types";
 
 import { parseIncomingMessage, formatOutgoingMessage } from "./formatter";

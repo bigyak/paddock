@@ -1,6 +1,6 @@
 /* @flow */
 
-import type { IncomingMessageType, OutgoingMessageType } from "yak-ai-wild-yak/dist/types";
+import type { IncomingMessageType, OutgoingMessageType } from "wild-yak/dist/types";
 
 /*
   Message Formats coming in from external systems.

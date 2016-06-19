@@ -1,5 +1,5 @@
 /* @flow */
-import type { IncomingMessageType, OutgoingMessageType } from "yak-ai-wild-yak/dist/types";
+import type { IncomingMessageType, OutgoingMessageType } from "wild-yak/dist/types";
 import type { SimpleIncomingMessageType, SimpleOutgoingMessageType } from "../../types";
 
 export function parseIncomingMessage(message: SimpleIncomingMessageType) : IncomingMessageType {
