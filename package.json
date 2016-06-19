@@ -1,11 +1,12 @@
 {
   "name": "paddock",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Yak<yak@agilehead.com>",
   "main": "dist/paddock",
   "scripts": {
     "test": "./build.sh && mocha --require source-map-support/register dist/test/test.js"
   },
+  "license": "MIT",
   "dependencies": {
     "babel-polyfill": "*",
     "wild-yak": "*"
