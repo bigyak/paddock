@@ -9,9 +9,56 @@ export async function verify({ query }: HttpContext<Object>, options: FbOptionsT
     { status: 200, text: query['hub.challenge'] } : { status: 500, text: 'Error, wrong validation token' }
 }
 
-export async function hook({ session, body }: HttpContext<FbIncomingBodyType>, options: FbOptionsType, topicsHandler: TopicsHandler) {
-  let validEvents = body.filter(ev => ev.message || ev.postback);
-  let incomingMessages = validEvents.map(ev => parseIncomingMessage(ev));
+function sendMessageResponse(session, outgoingMsg, options) {
+  const requestOpts = {
+    method: 'POST',
+    qs: { access_token: options.pageAccessTokens[session.pageId] },
+    uri: 'https://graph.facebook.com/v2.6/me/messages',
+    body: {
+      recipient: { id: session.user.id },
+      message: outgoingMsg
+    },
+    json: true // Automatically stringifies the body to JSON
+  };
+  console.log(JSON.stringify(requestOpts));
+  try {
+    await options.request(requestOpts);
+  } catch(e){
+    console.log("ERROR:", e);
+    await options.request({
+      method: 'POST',
+      qs: { access_token: options.pageAccessTokens[session.pageId] },
+      uri: 'https://graph.facebook.com/v2.6/me/messages',
+      body: {
+        recipient: { id: session.user.id },
+        message: {"text":"we had an unknown error.. please start again."}
+      },
+      json: true // Automatically stringifies the body to JSON
+    });
+  }
+}
+
+function sendFeedResponse(postToObjectId, session, outgoingMsg, options) {
+  const requestOpts = {
+    method: 'POST',
+    qs: { access_token: options.pageAccessTokens[session.pageId] },
+    uri: 'https://graph.facebook.com/v2.6/' + postToObjectId + '/comments',
+    body: {
+      message: outgoingMsg
+    },
+    json: true // Automatically stringifies the body to JSON
+  };
+  console.log(JSON.stringify(requestOpts));
+  try {
+    await options.request(requestOpts);
+  } catch(e){
+    console.log("ERROR:", e);
+  }
+
+export async function hook(conversationId: string, conversationType: string, { session, body }: HttpContext<FbIncomingBodyType>, options: FbOptionsType, topicsHandler: TopicsHandler) {
+  let validEvents = conversationType === 'messaging' ? body.filter(ev => ev.message || ev.postback)
+    : body.filter(ev => ev.item && ev.sender_id);
+  let incomingMessages = validEvents.map(ev => parseIncomingMessage(session.pageId, conversationType, ev, options));
 
   if (options.processIncomingMessages) {
     incomingMessages = options.processIncomingMessages(incomingMessages);
@@ -27,32 +74,11 @@ export async function hook({ session, body }: HttpContext<FbIncomingBodyType>, o
   }
 
   for (let _msg of outgoingMessages) {
-    const outgoingMsg = formatOutgoingMessage(_msg);
-    const requestOpts = {
-      method: 'POST',
-      qs: { access_token: options.pageAccessToken },
-      uri: 'https://graph.facebook.com/v2.6/me/messages',
-      body: {
-        recipient: { id: session.user.id },
-        message: outgoingMsg
-      },
-      json: true // Automatically stringifies the body to JSON
-    };
-    console.log(JSON.stringify(requestOpts));
-    try {
-      await options.request(requestOpts);
-    } catch(e){
-      console.log("ERROR:", e);
-      await options.request({
-        method: 'POST',
-        qs: { access_token: options.pageAccessToken },
-        uri: 'https://graph.facebook.com/v2.6/me/messages',
-        body: {
-          recipient: { id: session.user.id },
-          message: {"text":"we had an unknown error.. please start again."}
-        },
-        json: true // Automatically stringifies the body to JSON
-      });
+    const outgoingMsg = formatOutgoingMessage(pageId, conversationType, _msg);
+    if (conversationType == 'messaging') {
+      sendMessageResponse(session, outgoingMsg, options);
+    } else if (conversationType == 'feed') {
+      sendFeedResponse(conversationId, session, outgoingMsg, options);
     }
   }
 
