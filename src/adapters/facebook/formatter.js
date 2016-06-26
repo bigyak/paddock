@@ -2,7 +2,7 @@
 import type { IncomingMessageType, OutgoingMessageType } from "wild-yak/dist/types";
 import type { FbIncomingMessageType, FbOutgoingMessageType, FbIncomingStringMessageType, FbOutgoingMessageButtonType, FbOutgoingElementType } from "../../types";
 
-function async getObjectInfo(pageId, objectId, fields, options) {
+async function getObjectInfo(pageId, objectId, fields, options) {
   return await options.request({
     qs: { fields, access_token: options.pageAccessTokens.pageId },
     uri: 'https://graph.facebook.com/v2.6/' + objectId,
@@ -104,5 +104,6 @@ export function formatOutgoingMessage(pageId: string, conversationType: string, 
     switch(message.type) {
       case "string":
         return message.text;
+    }
   }
 }

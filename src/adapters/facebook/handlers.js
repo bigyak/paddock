@@ -9,7 +9,7 @@ export async function verify({ query }: HttpContext<Object>, options: FbOptionsT
     { status: 200, text: query['hub.challenge'] } : { status: 500, text: 'Error, wrong validation token' }
 }
 
-function sendMessageResponse(session, outgoingMsg, options) {
+async function sendMessageResponse(session, outgoingMsg, options) {
   const requestOpts = {
     method: 'POST',
     qs: { access_token: options.pageAccessTokens[session.pageId] },
@@ -38,7 +38,7 @@ function sendMessageResponse(session, outgoingMsg, options) {
   }
 }
 
-function sendFeedResponse(postToObjectId, session, outgoingMsg, options) {
+async function sendFeedResponse(postToObjectId, session, outgoingMsg, options) {
   const requestOpts = {
     method: 'POST',
     qs: { access_token: options.pageAccessTokens[session.pageId] },
@@ -54,11 +54,15 @@ function sendFeedResponse(postToObjectId, session, outgoingMsg, options) {
   } catch(e){
     console.log("ERROR:", e);
   }
+}
 
 export async function hook(conversationId: string, conversationType: string, { session, body }: HttpContext<FbIncomingBodyType>, options: FbOptionsType, topicsHandler: TopicsHandler) {
   let validEvents = conversationType === 'messaging' ? body.filter(ev => ev.message || ev.postback)
     : body.filter(ev => ev.item && ev.sender_id);
-  let incomingMessages = validEvents.map(ev => parseIncomingMessage(session.pageId, conversationType, ev, options));
+  let incomingMessages = [];
+  for (let i=0;i < validEvents.length; i++) {
+    incomingMessages.push(await parseIncomingMessage(session.pageId, conversationType, ev, options));
+  }
 
   if (options.processIncomingMessages) {
     incomingMessages = options.processIncomingMessages(incomingMessages);
@@ -66,7 +70,7 @@ export async function hook(conversationId: string, conversationType: string, { s
 
   let outgoingMessages = [];
   for (let _msg of incomingMessages) {
-    outgoingMessages = outgoingMessages.concat(await topicsHandler(session, _msg));
+    outgoingMessages = outgoingMessages.concat(await topicsHandler(conversationId, conversationType, session, _msg));
   }
 
   if (options.processOutgoingMessages) {
@@ -76,9 +80,9 @@ export async function hook(conversationId: string, conversationType: string, { s
   for (let _msg of outgoingMessages) {
     const outgoingMsg = formatOutgoingMessage(pageId, conversationType, _msg);
     if (conversationType == 'messaging') {
-      sendMessageResponse(session, outgoingMsg, options);
+      await sendMessageResponse(session, outgoingMsg, options);
     } else if (conversationType == 'feed') {
-      sendFeedResponse(conversationId, session, outgoingMsg, options);
+      await sendFeedResponse(conversationId, session, outgoingMsg, options);
     }
   }
 

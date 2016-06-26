@@ -63,8 +63,8 @@ export default function(options: FbOptionsType, topicsHandler: TopicsHandler) {
   if (!options.verifyToken) {
     throw new Error("verifyToken was empty.")
   }
-  if (!options.pageAccessToken) {
-    throw new Error("pageAccessToken was empty.")
+  if (!options.pageAccessTokens) {
+    throw new Error("pageAccessTokens were empty.")
   }
   return {
     verify: async (ctx: HttpContext<Object>) => await verify(ctx, options),

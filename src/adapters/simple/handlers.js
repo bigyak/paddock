@@ -4,7 +4,7 @@ import type { HttpContext, SimpleIncomingBodyType, SimpleOptionsType } from "../
 
 import { parseIncomingMessage, formatOutgoingMessage } from "./formatter";
 
-export async function hook({ session, body }: HttpContext<SimpleIncomingBodyType>, options: SimpleOptionsType, topicsHandler: TopicsHandler) {
+export async function hook(conversationId, conversationType, { session, body }: HttpContext<SimpleIncomingBodyType>, options: SimpleOptionsType, topicsHandler: TopicsHandler) {
   let incomingMessages = body.messages.map(m => parseIncomingMessage(m));
 
   if (options.processIncomingMessages) {
@@ -13,7 +13,7 @@ export async function hook({ session, body }: HttpContext<SimpleIncomingBodyType
 
   let outgoingMessages = [];
   for (let _msg of incomingMessages) {
-    outgoingMessages = outgoingMessages.concat(await topicsHandler(session, _msg));
+    outgoingMessages = outgoingMessages.concat(await topicsHandler(conversationId, conversationType, session, _msg));
   }
 
   if (options.processOutgoingMessages) {
