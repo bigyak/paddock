@@ -4,7 +4,7 @@ import type { FbIncomingMessageType, FbOutgoingMessageType, FbIncomingStringMess
 
 async function getObjectInfo(pageId, objectId, fields, options) {
   return await options.request({
-    qs: { fields, access_token: options.pageAccessTokens.pageId },
+    qs: { fields, access_token: options.pageAccessTokens[pageId] },
     uri: 'https://graph.facebook.com/v2.6/' + objectId,
     json: true // Automatically stringifies the body to JSON
   });
@@ -34,7 +34,7 @@ export async function parseIncomingMessage(pageId: string, conversationType: str
   } else if (conversationType == 'feed') {
     if (incoming.item === 'comment') {
       const fields = 'id,from,message,created_time';
-      const fbComment = getObjectInfo(pageId, incoming.comment_id, fields, options);
+      const fbComment = await getObjectInfo(pageId, incoming.comment_id, fields, options);
       return {
         type: "string",
         timestamp: incoming.created_time,

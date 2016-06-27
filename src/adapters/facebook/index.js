@@ -18,10 +18,10 @@ function getConversationId(pageId, feedChange) {
 
 function addToBatch(userBatches, senderId, conversationId, conversationType, entry) {
   if (!(senderId in userBatches))
-    userBatches[senderId] = {conversationType: {conversationId: [entry]}};
-  else if (!(conversationType in userBatches[senderId]))
-    userBatches[senderId][conversationType] = {conversationId: [entry]};
-  else if (!(conversationId in userBatches[senderId][conversationType]))
+    userBatches[senderId] = {};
+  if (!(conversationType in userBatches[senderId]))
+    userBatches[senderId][conversationType] = {};
+  if (!(conversationId in userBatches[senderId][conversationType]))
     userBatches[senderId][conversationType][conversationId] = [entry];
   else
     userBatches[senderId][conversationType][conversationId].push(entry);
@@ -37,7 +37,7 @@ function getMessageBatches(body: Object) : Array<{ object: Object, id: string, u
       if (entry.messaging) {
         for (let j=0; j<entry.messaging.length; j++) {
           let message = entry.messaging[j];
-          addToBatch(userBatches, message.sender.id, "messaging", pageId, message);
+          addToBatch(userBatches, message.sender.id, pageId, "messaging", message);
         }
       }
       if (entry.changes) {
@@ -48,7 +48,7 @@ function getMessageBatches(body: Object) : Array<{ object: Object, id: string, u
             let senderId = String(change.value.sender_id);
             if (senderId && senderId !== pageId) {
               let conversationId = getConversationId(pageId, change.value);
-              addToBatch(userBatches, senderId, "feed", conversationId, change.value);
+              addToBatch(userBatches, senderId, conversationId, "feed", change.value);
             }
           }
         }

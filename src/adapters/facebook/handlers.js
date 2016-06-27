@@ -22,7 +22,7 @@ async function sendMessageResponse(session, outgoingMsg, options) {
   };
   console.log(JSON.stringify(requestOpts));
   try {
-    await options.request(requestOpts);
+    console.log(await options.request(requestOpts));
   } catch(e){
     console.log("ERROR:", e);
     await options.request({
@@ -50,7 +50,7 @@ async function sendFeedResponse(postToObjectId, session, outgoingMsg, options) {
   };
   console.log(JSON.stringify(requestOpts));
   try {
-    await options.request(requestOpts);
+    console.log(await options.request(requestOpts));
   } catch(e){
     console.log("ERROR:", e);
   }
@@ -61,6 +61,7 @@ export async function hook(conversationId: string, conversationType: string, { s
     : body.filter(ev => ev.item && ev.sender_id);
   let incomingMessages = [];
   for (let i=0;i < validEvents.length; i++) {
+    let ev = validEvents[i];
     incomingMessages.push(await parseIncomingMessage(session.pageId, conversationType, ev, options));
   }
 
@@ -68,21 +69,27 @@ export async function hook(conversationId: string, conversationType: string, { s
     incomingMessages = options.processIncomingMessages(incomingMessages);
   }
 
-  let outgoingMessages = [];
-  for (let _msg of incomingMessages) {
-    outgoingMessages = outgoingMessages.concat(await topicsHandler(conversationId, conversationType, session, _msg));
+  let outgoingMessages = {};
+  for (let j=0;j < incomingMessages.length; j++) {
+    let _msg = incomingMessages[j];
+    outgoingMessages[j] = await topicsHandler(conversationId, conversationType, session, _msg);
   }
 
   if (options.processOutgoingMessages) {
-    outgoingMessages = options.processOutgoingMessages(outgoingMessages);
+    for (let _idx in outgoingMessages) {
+      outgoingMessages = options.processOutgoingMessages(outgoingMessages[_idx]);
+    }
   }
 
-  for (let _msg of outgoingMessages) {
-    const outgoingMsg = formatOutgoingMessage(pageId, conversationType, _msg);
-    if (conversationType == 'messaging') {
-      await sendMessageResponse(session, outgoingMsg, options);
-    } else if (conversationType == 'feed') {
-      await sendFeedResponse(conversationId, session, outgoingMsg, options);
+  for(let _idx in outgoingMessages) {
+    let postToObjectId = validEvents[_idx].parent_id.split('_')[0] !== session.pageId ? validEvents[_idx].parent_id : validEvents[_idx].comment_id;
+    for (let _msg of outgoingMessages[_idx]) {
+      const outgoingMsg = formatOutgoingMessage(session.pageId, conversationType, _msg);
+      if (conversationType == 'messaging') {
+        await sendMessageResponse(session, outgoingMsg, options);
+      } else if (conversationType == 'feed') {
+        await sendFeedResponse(postToObjectId, session, outgoingMsg, options);
+      }
     }
   }
 
