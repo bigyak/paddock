@@ -37,8 +37,9 @@ export async function parseIncomingMessage(pageId: string, conversationType: str
       const fbComment = await getObjectInfo(pageId, incoming.comment_id, fields, options);
       return {
         type: "string",
+        postId: incoming.post_id,
         timestamp: incoming.created_time,
-        text: fbComment.message,
+        text: 'Price please',//fbComment.message,
         sender: fbComment.from.name
       }
     }
