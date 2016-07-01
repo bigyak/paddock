@@ -1,8 +1,11 @@
 /* @flow */
 import type { IncomingMessageType, OutgoingMessageType } from "wild-yak/dist/types";
-import type { FbIncomingMessageType, FbOutgoingMessageType, FbIncomingStringMessageType, FbOutgoingMessageButtonType, FbOutgoingElementType } from "../../types";
+import type {
+  FbOptionsType, FbChatIncomingMessageType, FbFeedIncomingMessageType, FbIncomingMessageType,
+  FbOutgoingMessageType, FbOutgoingMessageButtonType, FbOutgoingElementType, FbCommentObjectType
+} from "../../types";
 
-async function getObjectInfo(pageId, objectId, fields, options) {
+async function getObjectInfo(pageId: string, objectId: string, fields: string, options: Object) {
   return await options.request({
     qs: { fields, access_token: options.pageAccessTokens.pageId },
     uri: 'https://graph.facebook.com/v2.6/' + objectId,
@@ -10,37 +13,61 @@ async function getObjectInfo(pageId, objectId, fields, options) {
   });
 }
 
-export async function parseIncomingMessage(pageId: string, conversationType: string, incoming: FbIncomingMessageType, options: FbOptionsType) : Promise<IncomingMessageType> {
+export async function parseIncomingMessage(
+  pageId: string,
+  conversationType: string,
+  incoming: FbIncomingMessageType,
+  options: FbOptionsType
+) : Promise<?IncomingMessageType> {
   if (conversationType == 'messaging') {
-    if (incoming.message && incoming.message.text) {
-      return {
-        type: "string",
-        timestamp: incoming.timestamp,
-        text: incoming.message.text
-      }
-    } else if (incoming.postback) {
-      return {
-        type: "string",
-        timestamp: incoming.timestamp,
-        text: incoming.postback.payload
-      }
-    } else {
-      return {
-        type: "string",
-        timestamp: incoming.timestamp,
-        text: "unknown message type"
-      }
-    }
+    const _incoming: any = incoming;
+    return parseIncomingChatMessage(pageId, _incoming, options);
   } else if (conversationType == 'feed') {
-    if (incoming.item === 'comment') {
-      const fields = 'id,from,message,created_time';
-      const fbComment = getObjectInfo(pageId, incoming.comment_id, fields, options);
-      return {
-        type: "string",
-        timestamp: incoming.created_time,
-        text: fbComment.message,
-        sender: fbComment.from.name
-      }
+    const _incoming: any = incoming;
+    return parseIncomingFeedMessage(pageId, _incoming, options);
+  }
+  throw new Error("Unknown conversationType");
+}
+
+async function parseIncomingChatMessage(
+  pageId: string,
+  incoming: FbChatIncomingMessageType,
+  options: FbOptionsType
+) : Promise<?IncomingMessageType> {
+  if (incoming.message && incoming.message.text) {
+    return {
+      type: "string",
+      timestamp: incoming.timestamp,
+      text: incoming.message.text
+    }
+  } else if (incoming.postback) {
+    return {
+      type: "string",
+      timestamp: incoming.timestamp,
+      text: incoming.postback.payload
+    }
+  } else {
+    return {
+      type: "string",
+      timestamp: incoming.timestamp,
+      text: "unknown message type"
+    }
+  }
+}
+
+async function parseIncomingFeedMessage(
+  pageId: string,
+  incoming: FbFeedIncomingMessageType,
+  options: FbOptionsType
+) : Promise<?IncomingMessageType> {
+  if (incoming.item === 'comment') {
+    const fields = 'id,from,message,created_time';
+    const fbComment = await getObjectInfo(pageId, incoming.comment_id, fields, options);
+    return {
+      type: "string",
+      timestamp: incoming.created_time,
+      text: fbComment.message,
+      sender: fbComment.from.name
     }
   }
 }
@@ -71,39 +98,47 @@ function formatElements(elements: Array<{ title: string, subtitle: string, image
   return formattedElements;
 }
 
-export function formatOutgoingMessage(pageId: string, conversationType: string, message: OutgoingMessageType) : FbOutgoingMessageType {
+export function formatOutgoingMessage(pageId: string, conversationType: string, message: OutgoingMessageType) : ?FbOutgoingMessageType {
   if (conversationType === 'messaging') {
-    switch(message.type) {
-      case "string":
-        return { text: message.text };
-      case "options":
-        return {
-          "attachment":{
-            "type":"template",
-            "payload":{
-              "template_type": "button",
-              "text": message.text ? message.text : null,
-              "buttons": formatButtons(message.values)
+    if (typeof message === "string") {
+      return { text: message };
+    } else {
+      switch(message.type) {
+        case "string":
+          return { text: message.text };
+        case "options":
+          return {
+            "attachment":{
+              "type":"template",
+              "payload":{
+                "template_type": "button",
+                "text": message.text ? message.text : null,
+                "buttons": formatButtons(message.values)
+              }
             }
-          }
-        };
-      case "elements":
-        return {
-          "attachment":{
-            "type":"template",
-            "payload":{
-              "template_type":"generic",
-              "elements": formatElements(message.values)
+          };
+        case "elements":
+          return {
+            "attachment":{
+              "type":"template",
+              "payload":{
+                "template_type":"generic",
+                "elements": formatElements(message.values)
+              }
             }
-          }
-        };
-      default:
-        return {"text": "hello world!"};
+          };
+        default:
+          return {"text": "hello world!"};
+      }
     }
   } else if (conversationType === 'feed') {
-    switch(message.type) {
-      case "string":
-        return message.text;
+    if (typeof message === "string") {
+      return { text: message };
+    } else {
+      switch(message.type) {
+        case "string":
+          return { text: message.text };
+      }
     }
   }
 }

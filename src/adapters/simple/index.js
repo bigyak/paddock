@@ -5,6 +5,6 @@ import { hook } from "./handlers";
 
 export default function(options: SimpleOptionsType, topicsHandler: TopicsHandler) {
   return {
-    hook: async (conversationId, conversationType, ctx: HttpContext<SimpleIncomingBodyType>) => await hook(conversationId, conversationType, ctx, options, topicsHandler)
+    hook: async (conversationId: string, conversationType: string, ctx: HttpContext<SimpleIncomingBodyType>) => await hook(conversationId, conversationType, ctx, options, topicsHandler)
   }
 }

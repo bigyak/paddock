@@ -2,6 +2,7 @@ import __polyfill from "babel-polyfill";
 import should from "should";
 import { init } from "../paddock";
 import getTopics from "./topics";
+import request from "request-promise";
 
 const simpleSession = {
   sessionId: "0xDEADBEEF",
@@ -9,7 +10,13 @@ const simpleSession = {
 };
 
 const adapterConfig = {
-  facebook: { verifyToken: "abcd", pageAccessToken: "xyz1" },
+  facebook: {
+    verifyToken: "kattangal",
+      pageAccessTokens: {
+        "abcd": "pqrs"
+      },
+      request
+  },
   simple: {}
 };
 
@@ -37,7 +44,7 @@ describe("Paddock", () => {
     const messages = [{ text: "Hello world" }];
     const { env, topics } = getTopics({ includeMain: true });
     const paddock = await init(topics, { getSessionId, getSessionType }, adapterConfig);
-    const result = await paddock.simple.hook({ session: simpleSession, body: { messages } });
+    const result = await paddock.simple.hook('web', 'maintopics', { session: simpleSession, body: { messages } });
     result.messages[0].text.should.equal("hey, what's up!");
   });
 

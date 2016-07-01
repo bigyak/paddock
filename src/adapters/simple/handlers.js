@@ -4,7 +4,7 @@ import type { HttpContext, SimpleIncomingBodyType, SimpleOptionsType } from "../
 
 import { parseIncomingMessage, formatOutgoingMessage } from "./formatter";
 
-export async function hook(conversationId, conversationType, { session, body }: HttpContext<SimpleIncomingBodyType>, options: SimpleOptionsType, topicsHandler: TopicsHandler) {
+export async function hook(conversationId: string, conversationType: string, { session, body }: HttpContext<SimpleIncomingBodyType>, options: SimpleOptionsType, topicsHandler: TopicsHandler) {
   let incomingMessages = body.messages.map(m => parseIncomingMessage(m));
 
   if (options.processIncomingMessages) {

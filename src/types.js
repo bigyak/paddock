@@ -9,8 +9,8 @@ import type { IncomingMessageType, OutgoingMessageType } from "wild-yak/dist/typ
     c) Twitter //todo
 */
 
-/* Facebook */
-export type FbIncomingStringMessageType = {
+/* Facebook Chat */
+export type FbChatIncomingStringMessageType = {
   sender: { id: string },
   recipient: { id: string},
   timestamp: number,
@@ -24,19 +24,40 @@ export type FbIncomingStringMessageType = {
   }
 }
 
-type FbMediaAttachmentType = { type: string, payload: { url: string } };
-export type FbIncomingMediaMessageType = {
+type FbChatMediaAttachmentType = { type: string, payload: { url: string } };
+export type FbChatIncomingMediaMessageType = {
   sender: { id: string },
   recipient: { id: string},
   timestamp: number,
-  message: {
+  message?: {
     mid: string,
     seq: number,
-    attachments: Array<FbMediaAttachmentType>
+    attachments: Array<FbChatMediaAttachmentType>
+  },
+  postback?: { payload: string }
+}
+export type FbChatIncomingMessageType = FbChatIncomingStringMessageType | FbChatIncomingMediaMessageType;
+
+/* Facebook Feed */
+export type FbFeedIncomingStringMessageType = {
+  created_time: number,
+  item: string,
+  sender_id: string,
+  comment_id: string
+}
+export type FbFeedIncomingMessageType = FbFeedIncomingStringMessageType;
+
+/* FB All types */
+export type FbIncomingMessageType = FbChatIncomingMessageType | FbFeedIncomingMessageType;
+export type FbIncomingBodyType = Array<FbIncomingMessageType>
+
+/* Fb Comment Object */
+export type FbCommentObjectType = {
+  message: string,
+  from: {
+    name: string
   }
 }
-export type FbIncomingMessageType = FbIncomingStringMessageType | FbIncomingMediaMessageType;
-export type FbIncomingBodyType = Array<FbIncomingMessageType>
 
 /* Simple */
 export type SimpleIncomingStringMessageType = {
@@ -104,7 +125,7 @@ export type ExternalOutgoingMessageType = FbOutgoingMessageType | SimpleOutgoing
 
 export type FbOptionsType = {
   verifyToken: string,
-  pageAccessToken: string,
+  pageAccessTokens: { [key: string ]: string },
   request: (opts: Object) => void,
   processIncomingMessages?: (msgs: Array<IncomingMessageType>) => Array<IncomingMessageType>,
   processOutgoingMessages?: (msgs: Array<OutgoingMessageType>) => Array<OutgoingMessageType>

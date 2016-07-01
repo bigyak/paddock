@@ -1,6 +1,6 @@
 /* @flow */
 import type { TopicsHandler } from "wild-yak/dist/types";
-import type { HttpContext, FbIncomingBodyType, FbOptionsType, FbIncomingMessageType } from "../../types";
+import type { HttpContext, FbIncomingBodyType, FbOptionsType, FbIncomingMessageType, FbChatIncomingMessageType, FbFeedIncomingMessageType } from "../../types";
 
 import { parseIncomingMessage, formatOutgoingMessage } from "./formatter";
 
@@ -56,12 +56,23 @@ async function sendFeedResponse(postToObjectId, session, outgoingMsg, options) {
   }
 }
 
-export async function hook(conversationId: string, conversationType: string, { session, body }: HttpContext<FbIncomingBodyType>, options: FbOptionsType, topicsHandler: TopicsHandler) {
-  let validEvents = conversationType === 'messaging' ? body.filter(ev => ev.message || ev.postback)
-    : body.filter(ev => ev.item && ev.sender_id);
+export async function hook(
+  conversationId: string,
+  conversationType: string,
+  { session, body }: HttpContext<FbIncomingBodyType>,
+  options: FbOptionsType,
+  topicsHandler: TopicsHandler
+) {
+  let validEvents = body.filter((ev: any) =>
+    (conversationType === "messaging") ? (ev.message || ev.postback) : (ev => ev.item && ev.sender_id)
+  );
+
   let incomingMessages = [];
-  for (let i=0;i < validEvents.length; i++) {
-    incomingMessages.push(await parseIncomingMessage(session.pageId, conversationType, ev, options));
+  for (let i = 0; i < validEvents.length; i++) {
+    const _msg = await parseIncomingMessage(session.pageId, conversationType, validEvents[i], options);
+    if (_msg) {
+      incomingMessages.push();
+    }
   }
 
   if (options.processIncomingMessages) {
@@ -70,7 +81,9 @@ export async function hook(conversationId: string, conversationType: string, { s
 
   let outgoingMessages = [];
   for (let _msg of incomingMessages) {
-    outgoingMessages = outgoingMessages.concat(await topicsHandler(conversationId, conversationType, session, _msg));
+    if (_msg) {
+      outgoingMessages = outgoingMessages.concat(await topicsHandler(conversationId, conversationType, session, _msg));
+    }
   }
 
   if (options.processOutgoingMessages) {
@@ -78,7 +91,7 @@ export async function hook(conversationId: string, conversationType: string, { s
   }
 
   for (let _msg of outgoingMessages) {
-    const outgoingMsg = formatOutgoingMessage(pageId, conversationType, _msg);
+    const outgoingMsg = formatOutgoingMessage(session.pageId, conversationType, _msg);
     if (conversationType == 'messaging') {
       await sendMessageResponse(session, outgoingMsg, options);
     } else if (conversationType == 'feed') {

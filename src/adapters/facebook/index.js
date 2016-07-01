@@ -2,7 +2,7 @@
 import type { TopicsHandler } from "wild-yak/dist/types";
 import type { FbOptionsType, FbIncomingBodyType, HttpContext } from "../../types";
 import { verify, hook } from "./handlers";
-
+import deepmerge from "../../vendor/deepmerge";
 
 function getPostId(pageId, postId) {
   return postId.split('_').length > 1 ? postId : pageId + '_' + postId;
@@ -14,26 +14,26 @@ function getConversationId(pageId, feedChange) {
     const postId = isReply ? getPostId(pageId, feedChange['parent_id'].split('_')[0]) : getPostId(pageId, feedChange['parent_id']);
     return postId;
   }
+  throw new Error("Invalid conversation id");
 }
 
-function addToBatch(userBatches, senderId, conversationId, conversationType, entry) {
-  if (!(senderId in userBatches))
-    userBatches[senderId] = {conversationType: {conversationId: [entry]}};
-  else if (!(conversationType in userBatches[senderId]))
-    userBatches[senderId][conversationType] = {conversationId: [entry]};
-  else if (!(conversationId in userBatches[senderId][conversationType]))
-    userBatches[senderId][conversationType][conversationId] = [entry];
-  else
-    userBatches[senderId][conversationType][conversationId].push(entry);
+
+function addToBatch(userBatches, senderId: string, conversationType: string, conversationId: string, entry: Object) {
+  deepmerge(userBatches, { [senderId]: { [conversationType]: { [conversationId]: [entry] } } });
 }
 
-function getMessageBatches(body: Object) : Array<{ object: Object, id: string, user_messages: {[key: string]: string}}> {
+type MessageBatchItem = {
+  object: Object,
+  pageId: string,
+  userBatches: { [key: string]: { [ key: string]: { [ key: string ]: Array<Object> } } }
+}
+function getMessageBatches(body: Object) : Array<MessageBatchItem> {
   let batches = [];
   if (body.entry) {
     for (let i=0; i<body.entry.length; i++) {
       let entry = body.entry[i];
       let pageId = entry.id;
-      let userBatches = { };
+      let userBatches = {};
       if (entry.messaging) {
         for (let j=0; j<entry.messaging.length; j++) {
           let message = entry.messaging[j];
@@ -53,7 +53,7 @@ function getMessageBatches(body: Object) : Array<{ object: Object, id: string, u
           }
         }
       }
-      batches.push({object: body.object, pageId, userBatches });
+      batches.push({ object: body.object, pageId, userBatches });
     }
   }
   return batches;
@@ -68,7 +68,7 @@ export default function(options: FbOptionsType, topicsHandler: TopicsHandler) {
   }
   return {
     verify: async (ctx: HttpContext<Object>) => await verify(ctx, options),
-    hook: async (conversationId, conversationType, ctx: HttpContext<FbIncomingBodyType>) => await hook(conversationId, conversationType, ctx, options, topicsHandler),
+    hook: async (conversationId: string, conversationType: string, ctx: HttpContext<FbIncomingBodyType>) => await hook(conversationId, conversationType, ctx, options, topicsHandler),
     getMessageBatches
   }
 }

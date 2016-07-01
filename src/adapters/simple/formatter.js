@@ -21,6 +21,6 @@ export function parseIncomingMessage(message: SimpleIncomingMessageType) : Incom
 }
 
 export function formatOutgoingMessage(message: OutgoingMessageType) : SimpleOutgoingMessageType {
-  const _message: SimpleOutgoingMessageType = message;
+  const _message: any = message;
   return _message;
 }
