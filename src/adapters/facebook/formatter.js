@@ -7,7 +7,7 @@ import type {
 
 async function getObjectInfo(pageId: string, objectId: string, fields: string, options: Object) {
   return await options.request({
-    qs: { fields, access_token: options.pageAccessTokens.pageId },
+    qs: { fields, access_token: options.pageAccessTokens[pageId] },
     uri: 'https://graph.facebook.com/v2.6/' + objectId,
     json: true // Automatically stringifies the body to JSON
   });
@@ -67,6 +67,7 @@ async function parseIncomingFeedMessage(
       type: "string",
       timestamp: incoming.created_time,
       text: fbComment.message,
+      text: 'Price please',//fbComment.message,
       sender: fbComment.from.name
     }
   }

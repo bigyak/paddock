@@ -27,6 +27,7 @@ type MessageBatchItem = {
   pageId: string,
   userBatches: { [key: string]: { [ key: string]: { [ key: string ]: Array<Object> } } }
 }
+
 function getMessageBatches(body: Object) : Array<MessageBatchItem> {
   let batches = [];
   if (body.entry) {
@@ -37,7 +38,7 @@ function getMessageBatches(body: Object) : Array<MessageBatchItem> {
       if (entry.messaging) {
         for (let j=0; j<entry.messaging.length; j++) {
           let message = entry.messaging[j];
-          addToBatch(userBatches, message.sender.id, "messaging", pageId, message);
+          addToBatch(userBatches, message.sender.id, pageId, "messaging", message);
         }
       }
       if (entry.changes) {
@@ -48,7 +49,7 @@ function getMessageBatches(body: Object) : Array<MessageBatchItem> {
             let senderId = String(change.value.sender_id);
             if (senderId && senderId !== pageId) {
               let conversationId = getConversationId(pageId, change.value);
-              addToBatch(userBatches, senderId, "feed", conversationId, change.value);
+              addToBatch(userBatches, senderId, conversationId, "feed", change.value);
             }
           }
         }
