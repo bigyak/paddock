@@ -1,8 +1,8 @@
 /* @flow */
 import type { IncomingMessageType, OutgoingMessageType } from "wild-yak/dist/types";
 import type {
-  FbOptionsType, FbChatIncomingMessageType, FbFeedIncomingMessageType, FbIncomingMessageType,
-  FbOutgoingMessageType, FbOutgoingMessageButtonType, FbOutgoingElementType, FbCommentObjectType
+  FbOptionsType, FbMessengerIncomingType, FbIncomingFeedMessageType, FbIncomingMessageType,
+  FbMessengerOutgoingType, FbMessengerOutgoingButtonType, FbOutgoingMessengerElementType, FbOutgoingFeedMessageType, FbCommentObjectType
 } from "../../types";
 
 async function getObjectInfo(pageId: string, objectId: string, fields: string, options: Object) {
@@ -31,7 +31,7 @@ export async function parseIncomingMessage(
 
 async function parseIncomingChatMessage(
   pageId: string,
-  incoming: FbChatIncomingMessageType,
+  incoming: FbMessengerIncomingType,
   options: FbOptionsType
 ) : Promise<?IncomingMessageType> {
   if (incoming.message && incoming.message.text) {
@@ -57,7 +57,7 @@ async function parseIncomingChatMessage(
 
 async function parseIncomingFeedMessage(
   pageId: string,
-  incoming: FbFeedIncomingMessageType,
+  incoming: FbIncomingFeedMessageType,
   options: FbOptionsType
 ) : Promise<?IncomingMessageType> {
   if (incoming.item === 'comment') {
@@ -73,7 +73,7 @@ async function parseIncomingFeedMessage(
   }
 }
 
-function formatButtons(optionValues: Array<string>) : Array<FbOutgoingMessageButtonType> {
+function formatChatButtons(optionValues: Array<string>) : Array<FbMessengerOutgoingButtonType> {
   let buttons = [];
   for (let i=0; i<optionValues.length; i++) {
     let val = optionValues[i];
@@ -86,60 +86,61 @@ function formatButtons(optionValues: Array<string>) : Array<FbOutgoingMessageBut
   return buttons;
 }
 
-function formatElements(elements: Array<{ title: string, subtitle: string, image_url: string, options: Array<string>}>) : Array<FbOutgoingElementType> {
+function formatChatElements(elements: Array<{ title: string, subtitle: string, image_url: string, options: Array<string>}>) : Array<FbOutgoingMessengerElementType> {
   let formattedElements = [];
   for (let i=0; i<elements.length; i++) {
     formattedElements.push({
       title: elements[i].title,
       subtitle: elements[i].subtitle,
       image_url: elements[i].image_url,
-      buttons: formatButtons(elements[i].options)
+      buttons: formatChatButtons(elements[i].options)
     })
   }
   return formattedElements;
 }
 
-export function formatOutgoingMessage(pageId: string, conversationType: string, message: OutgoingMessageType) : ?FbOutgoingMessageType {
-  if (conversationType === 'messaging') {
-    if (typeof message === "string") {
-      return { text: message };
-    } else {
-      switch(message.type) {
-        case "string":
-          return { text: message.text };
-        case "options":
-          return {
-            "attachment":{
-              "type":"template",
-              "payload":{
-                "template_type": "button",
-                "text": message.text ? message.text : null,
-                "buttons": formatButtons(message.values)
-              }
+export function formatOutgoingChatMessage(pageId: string, message: OutgoingMessageType) : ?FbMessengerOutgoingType {
+  if (typeof message === "string") {
+    return { text: message };
+  } else {
+    switch(message.type) {
+      case "string":
+        return { text: message.text };
+      case "options":
+        return {
+          "attachment":{
+            "type":"template",
+            "payload":{
+              "template_type": "button",
+              "text": message.text ? message.text : null,
+              "buttons": formatChatButtons(message.values)
             }
-          };
-        case "elements":
-          return {
-            "attachment":{
-              "type":"template",
-              "payload":{
-                "template_type":"generic",
-                "elements": formatElements(message.values)
-              }
+          }
+        };
+      case "elements":
+        return {
+          "attachment":{
+            "type":"template",
+            "payload":{
+              "template_type":"generic",
+              "elements": formatChatElements(message.values)
             }
-          };
-        default:
-          return {"text": "hello world!"};
-      }
+          }
+        };
+      default:
+        return {"text": "hello world!"};
     }
-  } else if (conversationType === 'feed') {
-    if (typeof message === "string") {
-      return { text: message };
-    } else {
-      switch(message.type) {
-        case "string":
-          return { text: message.text };
-      }
+  }
+}
+
+
+export function formatOutgoingFeedMessage(pageId: string, message: OutgoingMessageType) : ?FbOutgoingFeedMessageType {
+  if (typeof message === "string") {
+    return { text: message };
+  } else {
+    switch(message.type) {
+      case "string":
+        return { text: message.text };
     }
   }
 }

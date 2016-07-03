@@ -1,15 +1,18 @@
 /* @flow */
-import type { TopicsHandler } from "wild-yak/dist/types";
-import type { HttpContext, FbIncomingBodyType, FbOptionsType, FbIncomingMessageType, FbChatIncomingMessageType, FbFeedIncomingMessageType } from "../../types";
+import type { TopicsHandler, IncomingMessageType, OutgoingMessageType } from "wild-yak/dist/types";
+import type {
+  HttpContext, FbIncomingBodyType, FbOptionsType, FbIncomingMessageType, FbMessengerIncomingType, FbIncomingFeedMessageType,
+  FbMessengerOutgoingType, FbOutgoingFeedMessageType
+} from "../../types";
 
-import { parseIncomingMessage, formatOutgoingMessage } from "./formatter";
+import { parseIncomingMessage, formatOutgoingChatMessage, formatOutgoingFeedMessage } from "./formatter";
 
 export async function verify({ query }: HttpContext<Object>, options: FbOptionsType) : Promise<{ status: number, text: any }> {
   return (query['hub.verify_token'] === options.verifyToken) ?
     { status: 200, text: query['hub.challenge'] } : { status: 500, text: 'Error, wrong validation token' }
 }
 
-async function sendMessageResponse(session, outgoingMsg, options) {
+async function sendChatResponse(session: Object, outgoingMsg: FbMessengerOutgoingType, options: FbOptionsType) {
   const requestOpts = {
     method: 'POST',
     qs: { access_token: options.pageAccessTokens[session.pageId] },
@@ -38,7 +41,7 @@ async function sendMessageResponse(session, outgoingMsg, options) {
   }
 }
 
-async function sendFeedResponse(postToObjectId, session, outgoingMsg, options) {
+async function sendFeedResponse(postToObjectId: string, session: Object, outgoingMsg: FbOutgoingFeedMessageType, options: FbOptionsType) {
   const requestOpts = {
     method: 'POST',
     qs: { access_token: options.pageAccessTokens[session.pageId] },
@@ -67,11 +70,11 @@ export async function hook(
     (conversationType === "messaging") ? (ev.message || ev.postback) : (ev => ev.item && ev.sender_id)
   );
 
-  let incomingMessages = [];
+  let incomingMessages: Array<IncomingMessageType> = [];
   for (let i = 0; i < validEvents.length; i++) {
-    const _msg = await parseIncomingMessage(session.pageId, conversationType, validEvents[i], options);
-    if (_msg) {
-      incomingMessages.push();
+    const message: ?IncomingMessageType = await parseIncomingMessage(session.pageId, conversationType, validEvents[i], options);
+    if (message) {
+      incomingMessages.push(message);
     }
   }
 
@@ -79,26 +82,26 @@ export async function hook(
     incomingMessages = options.processIncomingMessages(incomingMessages);
   }
 
-  let outgoingMessages = [];
-  for (let _msg of incomingMessages) {
-    if (_msg) {
-      outgoingMessages = outgoingMessages.concat(await topicsHandler(conversationId, conversationType, session, _msg));
-    }
+  let outgoingMessages: Array<OutgoingMessageType> = [];
+  for (let message of incomingMessages) {
+    const outgoing: OutgoingMessageType | Array<OutgoingMessageType> = await topicsHandler(conversationId, conversationType, session, message);
+    outgoingMessages = outgoingMessages.concat(outgoing);
   }
 
   if (options.processOutgoingMessages) {
-    for (let _msg of outgoingMessages) {
-      outgoingMessages = options.processOutgoingMessages(_msg);
-    }
+    outgoingMessages = options.processOutgoingMessages(outgoingMessages);
   }
 
-  for(let _msg of outgoingMessages) {
-    let postToObjectId = validEvents[_idx].parent_id.split('_')[0] !== session.pageId ? validEvents[_idx].parent_id : validEvents[_idx].comment_id;
-    for (let _msg of outgoingMessages[_idx]) {
-      const outgoingMsg = formatOutgoingMessage(session.pageId, conversationType, _msg);
-      if (conversationType == 'messaging') {
-        await sendMessageResponse(session, outgoingMsg, options);
-      } else if (conversationType == 'feed') {
+  for(let message of outgoingMessages) {
+    if (conversationType === 'messaging') {
+      const outgoingMsg: ?FbMessengerOutgoingType = formatOutgoingChatMessage(session.pageId, message);
+      if (outgoingMsg) {
+        await sendChatResponse(session, outgoingMsg, options);
+      }
+    } else if (conversationType === 'feed') {
+      const outgoingMsg: ?FbOutgoingFeedMessageType = formatOutgoingFeedMessage(session.pageId, message)
+      if (outgoingMsg) {
+        let postToObjectId = outgoingMsg.parent_id.split('_')[0] !== session.pageId ? outgoingMsg.parent_id : outgoingMsg.comment_id;
         await sendFeedResponse(postToObjectId, session, outgoingMsg, options);
       }
     }
