@@ -35,11 +35,17 @@ export async function parseIncomingMessage(pageId: string, conversationType: str
     if (incoming.item === 'comment') {
       const fields = 'id,from,message,created_time';
       const fbComment = await getObjectInfo(pageId, incoming.comment_id, fields, options);
+      // return { type: 'string',
+      //   postId: '966627296766211_966942486734692',
+      //   timestamp: 1466972372,
+      //   text: 'is this available in Nungambakkam store?',
+      //   sender: 'Yakety Yak'
+      // };
       return {
         type: "string",
         postId: incoming.post_id,
         timestamp: incoming.created_time,
-        text: 'Price please',//fbComment.message,
+        text: fbComment.message,
         sender: fbComment.from.name
       }
     }
