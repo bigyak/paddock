@@ -82,12 +82,12 @@ export async function hook(conversationId: string, conversationType: string, { s
   }
 
   for(let _idx in outgoingMessages) {
-    let postToObjectId = validEvents[_idx].parent_id.split('_')[0] !== session.pageId ? validEvents[_idx].parent_id : validEvents[_idx].comment_id;
     for (let _msg of outgoingMessages[_idx]) {
       const outgoingMsg = formatOutgoingMessage(session.pageId, conversationType, _msg);
       if (conversationType == 'messaging') {
         await sendMessageResponse(session, outgoingMsg, options);
       } else if (conversationType == 'feed') {
+        let postToObjectId = validEvents[_idx].parent_id.split('_')[0] !== session.pageId ? validEvents[_idx].parent_id : validEvents[_idx].comment_id;
         await sendFeedResponse(postToObjectId, session, outgoingMsg, options);
       }
     }
