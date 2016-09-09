@@ -1,7 +1,7 @@
 /* @flow */
 import type { TopicsHandler } from "wild-yak/dist/types";
 import type { FbOptionsType, FbIncomingBodyType, HttpContext } from "../../types";
-import { verify, hook } from "./handlers";
+import { verify, hook, sendBulkMessages } from "./handlers";
 
 
 function getPostId(pageId, postId) {
@@ -69,6 +69,7 @@ export default function(options: FbOptionsType, topicsHandler: TopicsHandler) {
   return {
     verify: async (ctx: HttpContext<Object>) => await verify(ctx, options),
     hook: async (conversationId, conversationType, ctx: HttpContext<FbIncomingBodyType>) => await hook(conversationId, conversationType, ctx, options, topicsHandler),
-    getMessageBatches
+    getMessageBatches,
+    sendBatchMessages: async (sessions: Array<HttpContext<Object>>, outgoingMessages: Array<OutgoingMessageType>, conversationType: string) => await sendBulkMessages(sessions, outgoingMessages, conversationType, options)
   }
 }

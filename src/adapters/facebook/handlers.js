@@ -95,3 +95,12 @@ export async function hook(conversationId: string, conversationType: string, { s
 
   return { status: 200 };
 }
+
+export async function sendBulkMessages(contexts, outgoingMessages, conversationType, options) {
+  for (let {session} of contexts) {
+    for (let _msg of outgoingMessages) {
+      const outgoingMsg = formatOutgoingMessage(session.pageId, conversationType, _msg);
+      await sendMessageResponse(session, outgoingMsg, options);
+    }
+  }
+}

@@ -59,7 +59,11 @@ function formatButtons(optionValues: Array<string>) : Array<FbOutgoingMessageBut
     if (typeof(val) == 'string') {
       buttons.push({ "type": "postback", "title":val, "payload":val });
     } else if (typeof(val) == 'object') {
-      buttons.push({ "type":"web_url", "url": val.url, "title": val.text });
+      if ('payload' in val) {
+        buttons.push({ "type": "postback", "title":val.text, "payload":val.payload });
+      } else {
+        buttons.push({ "type":"web_url", "url": val.url, "title": val.text });
+      }
     }
   }
   return buttons;
